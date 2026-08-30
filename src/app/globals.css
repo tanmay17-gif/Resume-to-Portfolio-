@@ -1,26 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 0.25rem;
+
+  /* ── Editorial Typography System ── */
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Space Grotesk', 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+  /* ── Editorial Palette: Ivory, Charcoal, Soft Grey ── */
+  --background: #f7f5f0;
+  --foreground: #1a1a18;
+  --card: #faf9f6;
+  --card-foreground: #1a1a18;
+  --popover: #faf9f6;
+  --popover-foreground: #1a1a18;
+  --primary: #1a1a18;
+  --primary-foreground: #f7f5f0;
+  --secondary: #eeebe3;
+  --secondary-foreground: #1a1a18;
+  --muted: #eeebe3;
+  --muted-foreground: #6b6860;
+  --accent: #e8e4da;
+  --accent-foreground: #1a1a18;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #e0ddd4;
+  --input: #e0ddd4;
+  --ring: #1a1a18;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: #f2f0ea;
+  --sidebar-foreground: #1a1a18;
+  --sidebar-primary: #1a1a18;
+  --sidebar-primary-foreground: #f7f5f0;
+  --sidebar-accent: #e8e4da;
+  --sidebar-accent-foreground: #1a1a18;
+  --sidebar-border: #e0ddd4;
+  --sidebar-ring: #1a1a18;
+
+  /* ── Editorial Surface Tokens ── */
+  --ed-ivory: #f7f5f0;
+  --ed-ivory-deep: #f0ede4;
+  --ed-cream: #faf9f6;
+  --ed-line: #d8d5cc;
+  --ed-charcoal: #1a1a18;
+  --ed-grey-soft: #6b6860;
+  --ed-grey-mid: #9a9890;
+  --ed-surface-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+  --ed-surface-shadow-hover: 0 2px 8px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.05);
+}
+
+.dark {
+  --background: #151512;
+  --foreground: #f0ede4;
+  --card: #1e1d1a;
+  --card-foreground: #f0ede4;
+  --popover: #1e1d1a;
+  --popover-foreground: #f0ede4;
+  --primary: #f0ede4;
+  --primary-foreground: #151512;
+  --secondary: #2a2925;
+  --secondary-foreground: #f0ede4;
+  --muted: #2a2925;
+  --muted-foreground: #8a8880;
+  --accent: #2a2925;
+  --accent-foreground: #f0ede4;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: #2e2d29;
+  --input: #2e2d29;
+  --ring: #f0ede4;
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: #1e1d1a;
+  --sidebar-foreground: #f0ede4;
+  --sidebar-primary: #f0ede4;
+  --sidebar-primary-foreground: #151512;
+  --sidebar-accent: #2a2925;
+  --sidebar-accent-foreground: #f0ede4;
+  --sidebar-border: #2e2d29;
+  --sidebar-ring: #f0ede4;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    font-feature-settings: "ss01", "ss02";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--ed-ivory);
+  }
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: var(--font-display);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─────────────────────────────────────────
+   Editorial Surface Classes
+   Flat, refined, minimal shadow elevation
+───────────────────────────────────────── */
+
+/* Flat cream surface — base editorial panel */
+.ed-surface {
+  background: var(--ed-cream);
+  border: 1px solid var(--ed-line);
+  box-shadow: var(--ed-surface-shadow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
+.ed-surface:hover {
+  box-shadow: var(--ed-surface-shadow-hover);
+}
+
+/* Ivory background tile */
+.ed-tile {
+  background: var(--ed-ivory);
+  border: 1px solid var(--ed-line);
+}
+
+/* Hair-line editorial divider */
+.ed-rule {
+  height: 1px;
+  background: var(--ed-line);
+  width: 100%;
+}
+
+/* ─────────────────────────────────────────
+   Editorial Typography Scale
+   Pairs DM Serif Display (editorial titles)
+   with Space Grotesk (refined UI text)
+───────────────────────────────────────── */
+.text-display {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 8vw, 6rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.0;
+  letter-spacing: -0.01em;
+  color: var(--ed-charcoal);
+}
+.text-hero {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4.5vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--ed-charcoal);
+}
+.text-title {
+  font-family: var(--font-body);
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--ed-charcoal);
+}
+/* Uppercase metadata label — Swiss editorial staple */
+.text-label {
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ed-grey-mid);
+}
+.text-section {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ed-grey-mid);
+}
+.text-meta {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--ed-grey-soft);
+  letter-spacing: 0.01em;
+}
+
+/* ─────────────────────────────────────────
+   Editorial Button
+───────────────────────────────────────── */
+.ed-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--ed-charcoal);
+  color: var(--ed-ivory);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid var(--ed-charcoal);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.ed-btn-primary:hover {
+  background: #2e2d2a;
+}
+.ed-btn-primary:active {
+  transform: scale(0.985);
+}
+
+.ed-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--ed-charcoal);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid var(--ed-line);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.ed-btn-ghost:hover {
+  background: var(--ed-ivory-deep);
+  border-color: #bbb8af;
+}
+
+/* ─────────────────────────────────────────
+   Editorial Input
+───────────────────────────────────────── */
+.ed-input {
+  background: var(--ed-cream);
+  border: 1px solid var(--ed-line);
+  border-radius: 2px;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--ed-charcoal);
+  outline: none;
+  transition: border-color 0.15s ease;
+  width: 100%;
+}
+.ed-input:focus {
+  border-color: var(--ed-charcoal);
+}
+.ed-input::placeholder {
+  color: var(--ed-grey-mid);
+}
+
+/* ─────────────────────────────────────────
+   Smooth Scrollbar
+───────────────────────────────────────── */
+* { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.10) transparent; }
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 9999px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ─────────────────────────────────────────
+   Prefers-reduced-motion
+───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─────────────────────────────────────────
+   Legacy compat shims
+───────────────────────────────────────── */
+.kdm-float, .kdm-card, .liquid-glass {
+  background: var(--ed-cream);
+  border: 1px solid var(--ed-line);
+  box-shadow: var(--ed-surface-shadow);
+}
+.aurora-bg { display: none; }
