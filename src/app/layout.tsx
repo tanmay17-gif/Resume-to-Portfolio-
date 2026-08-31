@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PostHogProvider } from "@/components/posthog-provider";
-import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+import { ReCaptchaProvider } from "@/components/recaptcha-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +26,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <GoogleReCaptchaProvider
-          reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? ""}
-          scriptProps={{ async: true, defer: true }}
-        >
+        <ReCaptchaProvider>
           <PostHogProvider>{children}</PostHogProvider>
-        </GoogleReCaptchaProvider>
+        </ReCaptchaProvider>
       </body>
     </html>
   );
