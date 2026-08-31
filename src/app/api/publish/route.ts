@@ -102,5 +102,5 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json({ status: "ok", portfolio_html_or_component: "rendered via PortfolioRenderer", slug: data.slug, id: data.id });
+  return NextResponse.json({ status: "ok", portfolio_html_or_component: "rendered via PortfolioRenderer", slug: data?.slug, id: data?.id });
 }

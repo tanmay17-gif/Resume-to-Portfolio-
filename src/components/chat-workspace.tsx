@@ -6,7 +6,8 @@ import { stylePresets, type StylePresetKey } from "@/lib/stylePresets";
 import type { SchemaData } from "@/lib/schema";
 import {
   Loader2, ArrowUp, Paperclip, CheckCircle, ExternalLink,
-  Copy, BarChart3, Sparkles, FileText, Check, X, Layers
+  Copy, BarChart3, Sparkles, FileText, Check, X, Layers,
+  RotateCw,
 } from "lucide-react";
 import Link from "next/link";
 import { AppShell, StyleDropdown } from "@/components/app-shell";
@@ -70,7 +71,7 @@ function ChecklistBlock({ steps, completed, label }: { steps: string[]; complete
 }
 
 // ─── Published Card ──────────────────────────────────────────────────────────
-function PublishedCard({ slug, onCopy, copied, views }: { slug: string; onCopy: () => void; copied: boolean; views: number }) {
+function PublishedCard({ slug, onCopy, copied, views, onReloadViews }: { slug: string; onCopy: () => void; copied: boolean; views: number; onReloadViews: () => void }) {
   const url = `${window.location.origin}/${slug}`;
   return (
     <div className="border border-[#d8d5cc] p-5 w-full max-w-md" style={{ background: "var(--ed-cream, #faf9f6)" }}>
@@ -88,13 +89,7 @@ function PublishedCard({ slug, onCopy, copied, views }: { slug: string; onCopy: 
         <div className="ed-btn-ghost flex items-center justify-center gap-1.5 text-xs py-2 opacity-80">
           <BarChart3 className="size-3.5" /> {views} Views
           <button 
-            onClick={async () => {
-              try {
-                const supabase = createClient();
-                const { data } = await supabase.from("portfolios").select("views").eq("slug", slug).single();
-                if (data) setViews(data.views || 0);
-              } catch {}
-            }}
+            onClick={onReloadViews}
             className="p-1 hover:bg-[#e8e4da] rounded pointer-events-auto transition-colors" 
             title="Refresh views"
           >
@@ -635,6 +630,13 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
                         onCopy={() => handleCopyLink(msg.publishedSlug!)}
                         copied={copied}
                         views={views}
+                        onReloadViews={async () => {
+                          try {
+                            const supabase = createClient();
+                            const { data } = await supabase.from("portfolios").select("views").eq("slug", msg.publishedSlug).single();
+                            if (data) setViews(data.views || 0);
+                          } catch {}
+                        }}
                       />
                     )}
                   </div>
