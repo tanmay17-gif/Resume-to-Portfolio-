@@ -1,5 +1,8 @@
 # Resume to Portfolio — AI Studio
 
+[![Deployed on Vercel](https://vercel.com/button)](https://vercel.com)
+🚀 **Live Demo:** [Insert Live URL Here]
+
 > **Transform a standard resume into a fully-designed, production-ready personal portfolio website in minutes.**
 
 Resume to Portfolio is an AI-powered single-page application (SPA) that eliminates the friction of building a personal website. By uploading a standard PDF or DOCX resume, the platform leverages large language models (Google Gemini) to intelligently parse your professional history, structure it into a comprehensive data schema, and instantly generate a themed, responsive, and publicly hosted portfolio.
@@ -93,40 +96,68 @@ The primary user experience happens in `/dashboard`, designed to feel like an ed
 
 ---
 
-## 🚀 Getting Started for Developers
+## 🚀 Getting Started (Step-by-Step)
 
-### Prerequisites
-- Node.js (v18+)
-- A Supabase Project (Database & Auth)
-- A Google Gemini API Key
+Follow these instructions to set up the project locally.
 
-### Installation
+### 1. Prerequisites
+- **Node.js** (v18 or higher)
+- **Git** installed on your machine
+- Accounts on **Supabase** (Database/Auth), **Google AI Studio** (Gemini API), and **Vercel** (Deployment)
 
-1. Clone the repository and install dependencies:
+### 2. Supabase Setup (Database & Auth)
+This project relies on Supabase for PostgreSQL data storage, file uploads, and user authentication.
+1. Create a new project on [Supabase](https://supabase.com/).
+2. Go to **Project Settings > API** to find your `Project URL` and `anon public` key. You will need these for your environment variables.
+3. Navigate to the **SQL Editor** in the Supabase dashboard.
+4. Open the `supabase.sql` file located in the root of this repository, copy its entire contents, paste it into the Supabase SQL Editor, and click **Run**. This automatically creates all necessary tables (`resumes`, `portfolio_data`, `portfolios`), configures strict Row Level Security (RLS) policies, and creates the `resumes` storage bucket for PDF uploads.
+5. Go to **Authentication > Providers** to configure your desired login methods (Email/Password is a good start).
+
+### 3. Google Gemini API Setup
+1. Go to [Google AI Studio](https://aistudio.google.com/).
+2. Click on **Get API Key** and generate a new key.
+3. Save this key for your environment variables.
+
+### 4. Local Installation
+
+1. Clone the repository and navigate into it:
+   ```bash
+   git clone <your-repo-url>
+   cd "Resume to Portfolio"
+   ```
+
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Set up your environment variables (`.env.local`):
+3. Create a `.env.local` file in the root directory and add your specific keys:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
    GEMINI_API_KEY=your_gemini_api_key
    ```
 
-3. Start the development server:
+4. Start the local development server:
    ```bash
    npm run dev
    ```
 
-Open [http://localhost:3000](http://localhost:3000) to access the studio.
+Open [http://localhost:3000](http://localhost:3000) to access the studio and test the application locally.
 
 ---
 
-## 🌍 Deployment
+## 🌍 Deployment on Vercel
 
-The application is optimized for deployment on **Vercel**. Ensure all environment variables (Supabase, Gemini) are configured in your Vercel project settings before deploying. 
+The application uses Next.js App Router and is perfectly optimized for one-click deployment on **Vercel**.
 
-```bash
-npm run build
-```
+1. **Push your code** to a GitHub, GitLab, or Bitbucket repository.
+2. Go to [Vercel](https://vercel.com/) and click **Add New > Project**.
+3. Import your repository.
+4. **Important:** Before clicking deploy, go to the **Environment Variables** section and add the identical variables from your local setup:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `GEMINI_API_KEY`
+5. Click **Deploy**. Vercel will run `npm run build` and provision your production environment automatically.
+
+Congratulations! Your AI Studio is now live and ready to generate portfolios.
