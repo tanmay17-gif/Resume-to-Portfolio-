@@ -280,13 +280,31 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
       try {
         const formData = new FormData();
         formData.append("file", file);
-        const res = await fetch("/api/extract", { method: "POST", body: formData });
-        const json = await res.json();
+        
+        // Step 1: Parse PDF (can take up to 50s on cold start)
+        const parseRes = await fetch("/api/extract/parse", { method: "POST", body: formData });
+        const parseJson = await parseRes.json();
+        
+        if (!parseRes.ok || parseJson.status === "error" || parseJson.error) {
+          throw new Error(parseJson.error || "Extraction failed during PDF parsing.");
+        }
+
+        // Step 2: Structure Data with Gemini (takes ~15s)
+        const structRes = await fetch("/api/extract/structure", { 
+          method: "POST", 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pyResult: parseJson.pyResult,
+            filename: parseJson.filename,
+            mimetype: parseJson.mimetype
+          }) 
+        });
+        const json = await structRes.json();
         
         clearInterval(interval);
         
-        if (!res.ok || json.status === "error" || json.error) {
-          throw new Error(json.error || "Extraction failed");
+        if (!structRes.ok || json.status === "error" || json.error) {
+          throw new Error(json.error || "Extraction failed during AI structuring.");
         }
         
         setMessages(prev => prev.map(m => m.id === actId ? { ...m, completedSteps: extractSteps.length } : m));
