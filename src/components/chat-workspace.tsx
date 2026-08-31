@@ -86,7 +86,7 @@ function PublishedCard({ slug, onCopy, copied }: { slug: string; onCopy: () => v
       </div>
       <div className="grid grid-cols-2 gap-2">
         <button
-          onClick={() => alert("Insights (coming soon)")}
+          onClick={() => window.open("https://us.posthog.com", "_blank")}
           className="ed-btn-ghost flex items-center justify-center gap-1.5 text-xs py-2"
         >
           <BarChart3 className="size-3.5" /> Insights
