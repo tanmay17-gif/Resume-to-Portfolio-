@@ -14,6 +14,7 @@ import { ReviewModal } from "@/components/review-modal";
 import { PortfolioPreviewFrame } from "@/components/portfolio-preview-frame";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 type Message = {
@@ -115,6 +116,7 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [publishing, setPublishing] = useState(false);
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [processing, setProcessing] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [portfolioDataId, setPortfolioDataId] = useState<string | null>(null);
@@ -206,10 +208,15 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
     }
 
     try {
+      let recaptchaToken = "";
+      if (executeRecaptcha) {
+        recaptchaToken = await executeRecaptcha("publish_portfolio");
+      }
+
       const res = await fetch("/api/publish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ portfolio_data_id: portfolioDataId, style_preset: preset }),
+        body: JSON.stringify({ portfolio_data_id: portfolioDataId, style_preset: preset, recaptcha_token: recaptchaToken }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Publish failed");

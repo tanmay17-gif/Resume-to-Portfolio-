@@ -92,34 +92,41 @@ export function ExperienceEntry({ exp, i, presetKey, expandedExp, setExpandedExp
   const expanded = !!expandedExp[i];
   const visible = expanded ? exp.bullets : exp.bullets.slice(0, 3);
   const isRetro = presetKey === "retro";
+  const isClassic = presetKey === "classic";
 
   return (
-    <div className={isRetro ? "border-l-2 pl-3" : ""} style={isRetro ? { borderColor: preset.palette.accent } : {}}>
-      <div className="flex flex-wrap items-start justify-between gap-2">
+    <div
+      className={isRetro ? "border-l-2 pl-4" : isClassic ? "pl-4 border-l-2" : ""}
+      style={isRetro || isClassic ? { borderColor: preset.palette.accent } : {}}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-2 mb-2.5">
         <div>
-          <div className="font-display font-semibold text-[15px]" style={{ color: preset.palette.text }}>
+          <span className="font-semibold text-[15px]" style={{ color: preset.palette.text, fontFamily: isClassic ? "'Inter', sans-serif" : undefined }}>
             {exp.title}
-            {!isRetro && <span className="font-normal opacity-60"> · </span>}
-            <span style={{ color: isRetro ? preset.palette.accent : preset.palette.text, opacity: isRetro ? 1 : 0.75 }}>{exp.company}</span>
-          </div>
+          </span>
+          <span className="mx-2 opacity-40" style={{ color: preset.palette.text }}>·</span>
+          <span className="text-[14px]" style={{ color: isRetro ? preset.palette.accent : preset.palette.muted, fontFamily: isClassic ? "'Inter', sans-serif" : undefined }}>
+            {exp.company}
+          </span>
         </div>
-        <div className="text-xs shrink-0" style={{ color: preset.palette.muted }}>{exp.dates}</div>
+        <div className="text-xs shrink-0 tabular-nums" style={{ color: preset.palette.muted }}>{exp.dates}</div>
       </div>
-      <ul className="mt-2.5 space-y-1.5 text-sm" style={{ color: preset.palette.text, opacity: 0.85 }}>
+      <ul className="space-y-2" style={{ color: preset.palette.text, opacity: 0.82 }}>
         {visible.map((b, bi) => (
-          <li key={bi} className="flex gap-2 leading-relaxed">
-            <span style={{ color: preset.palette.accent, flexShrink: 0 }}>{isRetro ? ">" : "–"}</span>
-            {b}
+          <li key={bi} className="flex gap-3 text-sm leading-relaxed items-start" style={{ fontFamily: isClassic ? "'Inter', sans-serif" : undefined }}>
+            <span className="shrink-0 mt-[6px] size-1.5 rounded-full" style={{ background: preset.palette.accent, minWidth: "6px" }} />
+            <span>{b}</span>
           </li>
         ))}
       </ul>
       {exp.bullets.length > 3 && (
         <button
           onClick={() => setExpandedExp(prev => ({ ...prev, [i]: !prev[i] }))}
-          className="mt-2 text-xs font-semibold hover:underline"
+          className="mt-3 text-[11px] font-semibold uppercase tracking-wider hover:opacity-70 transition-opacity flex items-center gap-1.5"
           style={{ color: preset.palette.accent }}
         >
-          {expanded ? "Show less" : `+${exp.bullets.length - 3} more`}
+          <span>{expanded ? "Show less" : `+${exp.bullets.length - 3} more`}</span>
+          <span className="text-[10px]">{expanded ? "▲" : "▼"}</span>
         </button>
       )}
     </div>

@@ -21,9 +21,28 @@ export async function POST(request: Request) {
   const body = await request.json();
   const portfolio_data_id = body.portfolio_data_id as string;
   const style_preset = body.style_preset as StylePresetKey;
+  const recaptcha_token = body.recaptcha_token as string;
 
   if (!portfolio_data_id || !style_preset || !(style_preset in stylePresets)) {
     return NextResponse.json({ error: "Invalid portfolio_data_id or style_preset" }, { status: 400 });
+  }
+
+  if (!recaptcha_token) {
+    return NextResponse.json({ error: "Missing reCAPTCHA token" }, { status: 400 });
+  }
+
+  // Verify reCAPTCHA token
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  if (secretKey) {
+    const recaptchaRes = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${secretKey}&response=${recaptcha_token}`,
+    });
+    const recaptchaJson = await recaptchaRes.json();
+    if (!recaptchaJson.success || recaptchaJson.score < 0.5) {
+      return NextResponse.json({ error: "reCAPTCHA verification failed, score too low" }, { status: 403 });
+    }
   }
 
   const service = createServiceClient();

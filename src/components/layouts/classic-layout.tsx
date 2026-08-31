@@ -26,13 +26,14 @@ export function ClassicLayout({ data }: { data: SchemaData }) {
     { id: "section-about", label: "About" },
     ...(has(data.projects) ? [{ id: "section-work", label: "Selected Works" }] : []),
     ...(has(data.experience) ? [{ id: "section-experience", label: "Experience" }] : []),
-    ...(has(data.skills) || has(data.education) ? [{ id: "section-capabilities", label: "Capabilities" }] : []),
+    ...(has(data.skills) || has(data.education) || has(data.achievements) ? [{ id: "section-capabilities", label: "Capabilities" }] : []),
+    ...(has(data.custom_sections) ? [{ id: "section-custom", label: "More" }] : []),
   ];
 
   const { activeId, scrollTo } = useActiveSection(navSections);
 
   return (
-    <div className="min-h-screen relative" style={{ fontFamily: "'Merriweather', Georgia, serif", background: preset.palette.bg }}>
+    <div className="min-h-screen relative" style={{ fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif", background: preset.palette.bg }}>
       <ClassicHero className="fixed inset-0 z-0" />
       
       {/* Elegant Sticky Header Navigation */}
