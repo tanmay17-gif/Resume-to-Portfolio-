@@ -110,6 +110,8 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
   const [selectedStyle, setSelectedStyle] = useState<StylePresetKey>("minimal");
   const [promptText, setPromptText] = useState("");
   const [copied, setCopied] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   // ── WAKE UP RENDER MICROSERVICE ──────────────────────────────────────────
   useEffect(() => {
     // Ping to wake up the Render service as soon as they land on the dashboard.
