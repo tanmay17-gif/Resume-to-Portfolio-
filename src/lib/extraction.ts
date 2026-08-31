@@ -174,9 +174,14 @@ export async function orchestrateExtraction(opts: {
 
     // PDF path — PyMuPDF first, then decide text vs vision in one pass
     // In production (Vercel), call the Render microservice; locally, spawn Python
-    const pyResult = process.env.EXTRACT_SERVICE_URL
-      ? await extractViaService(fileBuffer, filename, 150)
-      : await extractViaPython(filePath, 150);
+    let pyResult;
+    if (process.env.EXTRACT_SERVICE_URL) {
+      pyResult = await extractViaService(fileBuffer, filename, 150);
+    } else if (process.env.VERCEL === "1") {
+      throw new Error("EXTRACT_SERVICE_URL is missing in Vercel Environment Variables! Cannot extract PDF.");
+    } else {
+      pyResult = await extractViaPython(filePath, 150);
+    }
     const textLen = pyResult.text.trim().length;
     let usedVision = false;
     let confidence = pyResult.confidence;
