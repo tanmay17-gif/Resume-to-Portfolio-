@@ -101,7 +101,7 @@ export async function extractViaService(fileBuffer: Buffer, filename: string, dp
   if (!serviceUrl) throw new Error("EXTRACT_SERVICE_URL not set");
 
   const form = new FormData();
-  const blob = new Blob([fileBuffer], { type: "application/pdf" });
+  const blob = new Blob([new Uint8Array(fileBuffer)], { type: "application/pdf" });
   form.append("file", blob, filename);
   form.append("dpi", String(dpi));
 
