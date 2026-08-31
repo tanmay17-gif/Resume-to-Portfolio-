@@ -110,7 +110,15 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
   const [selectedStyle, setSelectedStyle] = useState<StylePresetKey>("minimal");
   const [promptText, setPromptText] = useState("");
   const [copied, setCopied] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // ── WAKE UP RENDER MICROSERVICE ──────────────────────────────────────────
+  useEffect(() => {
+    // Ping to wake up the Render service as soon as they land on the dashboard.
+    // This hides the 50-second cold start penalty inside the user's "think time"
+    // (the time they spend reading the page and finding their PDF).
+    fetch("/api/wake").catch(() => {});
+  }, []);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
