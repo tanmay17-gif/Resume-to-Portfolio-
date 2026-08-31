@@ -96,6 +96,33 @@ The primary user experience happens in `/dashboard`, designed to feel like an ed
 
 ---
 
+## 📁 Project Structure
+
+For developers and reviewers navigating the codebase, here is a high-level overview of the repository structure:
+
+```text
+├── public/                 # Static assets (images, fonts, etc.)
+├── src/
+│   ├── app/                # Next.js App Router (Pages, API Routes like /api/extract)
+│   ├── components/         # Reusable React components (UI elements, Layouts)
+│   ├── hooks/              # Custom React hooks for state management
+│   └── lib/                # Utility functions, Supabase client, and Gemini helpers
+├── pdf-extractor/          # Python-based microservice/script for advanced PDF parsing
+├── supabase.sql            # Database schema, tables, and Row Level Security policies
+└── README.md               # You are here
+```
+
+---
+
+## 🔒 Security Overview
+
+Security best practices have been strictly followed:
+- **No Hardcoded Secrets:** All API keys (Gemini) and Database credentials (Supabase) are managed exclusively through environment variables (`.env.local` locally and Vercel Environment Variables in production).
+- **Row Level Security (RLS):** The Supabase PostgreSQL database enforces strict RLS policies (see `supabase.sql`). Users can only read/write their own resumes and portfolio drafts.
+- **Git Hooks:** `.gitignore` is properly configured to prevent any accidental commits of `.env` files or sensitive build artifacts.
+
+---
+
 ## 🚀 Getting Started (Step-by-Step)
 
 Follow these instructions to set up the project locally.
