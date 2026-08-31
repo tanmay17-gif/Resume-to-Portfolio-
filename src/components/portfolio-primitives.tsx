@@ -298,3 +298,27 @@ export function ContactRow({ data, presetKey, className = "" }: { data: SchemaDa
     </div>
   );
 }
+
+// ── Custom Sections ──────────────────────────────────────────────────────
+export function CustomSections({ data, presetKey }: { data: SchemaData; presetKey: StylePresetKey }) {
+  if (!data.custom_sections || data.custom_sections.length === 0) return null;
+  const preset = stylePresets[presetKey];
+
+  return (
+    <>
+      {data.custom_sections.map((sec, i) => (
+        <section key={i} className="mb-10 last:mb-0">
+          <SectionHeading label={sec.title} presetKey={presetKey} />
+          <ul className="space-y-2 list-none p-0 m-0">
+            {sec.items.map((item, j) => (
+              <li key={j} className="text-sm leading-relaxed flex items-start gap-3" style={{ color: preset.palette.text }}>
+                <span className="shrink-0 mt-1.5 size-1.5 rounded-full" style={{ background: preset.palette.accent }} />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </>
+  );
+}

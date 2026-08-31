@@ -6,7 +6,7 @@ import { stylePresets } from "@/lib/stylePresets";
 import type { SchemaData } from "@/lib/schema";
 import { GenerativeProjectVisual } from "@/components/project-visual";
 import { P5Background } from "@/components/p5-bg";
-import { ExperienceEntry, TechPill, SkillsSection, ContactRow } from "@/components/portfolio-primitives";
+import { ExperienceEntry, TechPill, SkillsSection, ContactRow , CustomSections } from "@/components/portfolio-primitives";
 import { DarkProHero, DarkProProjectVisual, DarkProSkillsBg, DarkProPanelBg } from "@/components/threeui-adapter";
 import { ExternalLink } from "lucide-react";
 import { useActiveSection } from "@/hooks/use-active-section";
@@ -29,6 +29,7 @@ export function DarkProLayout({ data }: { data: SchemaData }) {
     ...(has(data.projects) ? [{ id: "section-work", label: "Work" }] : []),
     ...(has(data.experience) ? [{ id: "section-experience", label: "Exp" }] : []),
     ...(has(data.skills) || has(data.education) || has(data.achievements) ? [{ id: "section-capabilities", label: "Capabilities" }] : []),
+    ...(has(data.custom_sections) ? [{ id: "section-custom", label: "More" }] : []),
   ];
 
   const { activeId, scrollTo } = useActiveSection(navSections);
@@ -51,7 +52,7 @@ export function DarkProLayout({ data }: { data: SchemaData }) {
           {/* Identity */}
           <div id="section-about-header">
             <div className="text-[10px] font-mono tracking-widest uppercase mb-3" style={{ color: preset.palette.accent }}>
-              &gt; portfolio.init()
+              PROFILE
             </div>
             <h1
               className="text-3xl xl:text-4xl font-bold leading-tight tracking-tight break-words"
@@ -113,7 +114,7 @@ export function DarkProLayout({ data }: { data: SchemaData }) {
         {has(data.projects) && (
           <section id="section-work">
             <div className="text-[10px] font-mono tracking-widest uppercase mb-4" style={{ color: preset.palette.accent }}>
-              &gt; ls ./projects
+              PROJECTS
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
               {data.projects!.map((proj, i) => (
@@ -175,7 +176,7 @@ export function DarkProLayout({ data }: { data: SchemaData }) {
           >
             <DarkProPanelBg className="z-0" />
             <div className="relative z-10">
-              <div className="text-[10px] font-mono tracking-widest uppercase mb-4" style={{ color: preset.palette.accent }}>&gt; cat experience.log</div>
+              <div className="text-[10px] font-mono tracking-widest uppercase mb-4" style={{ color: preset.palette.accent }}>EXPERIENCE</div>
               <div className="space-y-6">
                 {data.experience!.map((exp, i) => (
                   <ExperienceEntry key={i} exp={exp} i={i} presetKey={p} expandedExp={expandedExp} setExpandedExp={setExpandedExp} />
@@ -198,7 +199,7 @@ export function DarkProLayout({ data }: { data: SchemaData }) {
               >
                 <DarkProSkillsBg className="z-0" />
                 <div className="relative z-10">
-                  <div className="text-[10px] font-mono tracking-widest uppercase mb-4" style={{ color: preset.palette.accent }}>&gt; skills --list</div>
+                  <div className="text-[10px] font-mono tracking-widest uppercase mb-4" style={{ color: preset.palette.accent }}>SKILLS</div>
                   <SkillsSection skills={data.skills!} presetKey={p} />
                 </div>
               </motion.section>
@@ -211,7 +212,7 @@ export function DarkProLayout({ data }: { data: SchemaData }) {
                 className="p-6"
                 style={{ background: preset.palette.card, border: preset.border, borderRadius: preset.radius }}
               >
-                <div className="text-[10px] font-mono tracking-widest uppercase mb-4" style={{ color: preset.palette.accent }}>&gt; cat education.md</div>
+                <div className="text-[10px] font-mono tracking-widest uppercase mb-4" style={{ color: preset.palette.accent }}>EDUCATION</div>
                 <div className="space-y-4">
                   {data.education!.map((ed, i) => (
                     <div key={i} className="border-l-2 pl-3" style={{ borderColor: preset.palette.accent }}>
@@ -236,7 +237,7 @@ export function DarkProLayout({ data }: { data: SchemaData }) {
               className="p-6"
               style={{ background: preset.palette.card, border: preset.border, borderRadius: preset.radius }}
             >
-              <div className="text-[10px] font-mono tracking-widest uppercase mb-4" style={{ color: preset.palette.accent }}>&gt; achievements --verbose</div>
+              <div className="text-[10px] font-mono tracking-widest uppercase mb-4" style={{ color: preset.palette.accent }}>ACHIEVEMENTS</div>
               <div className="grid sm:grid-cols-2 gap-2">
                 {data.achievements!.map((a, i) => (
                   <div key={i} className="flex gap-2 text-xs font-mono" style={{ color: preset.palette.text }}>
@@ -248,7 +249,11 @@ export function DarkProLayout({ data }: { data: SchemaData }) {
           )}
         </div>
 
-        {/* Footer */}
+        
+          {/* Custom Sections */}
+          <CustomSections data={data} presetKey={p} />
+
+          {/* Footer */}
         <div className="mt-8 text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.15)" }}>
           &gt; {data.name.toLowerCase().replace(/ /g, "-")}.portfolio — generated via resume-to-portfolio
         </div>

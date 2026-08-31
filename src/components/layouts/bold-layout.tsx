@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { stylePresets } from "@/lib/stylePresets";
 import type { SchemaData } from "@/lib/schema";
 import { GenerativeProjectVisual } from "@/components/project-visual";
-import { ExperienceEntry, TechPill, SkillsSection } from "@/components/portfolio-primitives";
+import { ExperienceEntry, TechPill, SkillsSection , CustomSections } from "@/components/portfolio-primitives";
 import { BoldHero, BoldProjectVisual, BoldSectionAccent } from "@/components/threeui-adapter";
 import { ExternalLink } from "lucide-react";
 import { useActiveSection } from "@/hooks/use-active-section";
@@ -70,6 +70,10 @@ export function BoldLayout({ data }: { data: SchemaData }) {
               {data.summary}
             </p>
           )}
+          
+          {/* Custom Sections */}
+          <CustomSections data={data} presetKey={p} />
+
           <div className="mt-8 flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm font-black uppercase">
             <a href={`mailto:${data.contact.email}`} className="border-[3px] border-black px-4 py-2 hover:bg-black hover:text-[#facc15] transition-colors" style={{ color: "#000", background: "#fff", boxShadow: "4px 4px 0 #000" }}>EMAIL</a>
             {data.contact.links?.map((l, i) => (

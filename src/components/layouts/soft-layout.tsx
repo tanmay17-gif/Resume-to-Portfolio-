@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { stylePresets } from "@/lib/stylePresets";
 import type { SchemaData } from "@/lib/schema";
 import { GenerativeProjectVisual } from "@/components/project-visual";
-import { ExperienceEntry, TechPill, SkillsSection, ContactRow } from "@/components/portfolio-primitives";
+import { ExperienceEntry, TechPill, SkillsSection, ContactRow , CustomSections } from "@/components/portfolio-primitives";
 import { SoftHero, SoftProjectVisual, SoftSkillsBg } from "@/components/threeui-adapter";
 import { ExternalLink } from "lucide-react";
 import { useActiveSection } from "@/hooks/use-active-section";
@@ -27,7 +27,8 @@ export function SoftLayout({ data }: { data: SchemaData }) {
     { id: "section-about", label: "About" },
     ...(has(data.projects) ? [{ id: "section-work", label: "Work" }] : []),
     ...(has(data.experience) ? [{ id: "section-experience", label: "Experience" }] : []),
-    ...(has(data.skills) || has(data.education) ? [{ id: "section-capabilities", label: "Capabilities" }] : []),
+    ...(has(data.skills) || has(data.education) || has(data.achievements) ? [{ id: "section-capabilities", label: "Capabilities" }] : []),
+    ...(has(data.custom_sections) ? [{ id: "section-custom", label: "More" }] : []),
   ];
 
   const { activeId, scrollTo } = useActiveSection(navSections);
@@ -214,6 +215,13 @@ export function SoftLayout({ data }: { data: SchemaData }) {
               </motion.div>
             )}
           </div>
+
+          {/* Custom Sections */}
+          {has(data.custom_sections) && (
+            <div id="section-custom" className="mt-8">
+              <CustomSections data={data} presetKey={p} />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { stylePresets } from "@/lib/stylePresets";
 import type { SchemaData } from "@/lib/schema";
-import { ExperienceEntry, TechPill, SkillsSection } from "@/components/portfolio-primitives";
+import { ExperienceEntry, TechPill, SkillsSection , CustomSections } from "@/components/portfolio-primitives";
 import { RetroBg, RetroHero, RetroProjectVisual } from "@/components/threeui-adapter";
 import { ExternalLink } from "lucide-react";
 import { useActiveSection } from "@/hooks/use-active-section";
@@ -254,7 +254,11 @@ export function RetroLayout({ data }: { data: SchemaData }) {
           </div>
         </div>
 
-        {/* Footer */}
+        
+          {/* Custom Sections */}
+          <CustomSections data={data} presetKey={p} />
+
+          {/* Footer */}
         <div className="text-[10px] font-mono mt-6" style={{ color: "rgba(0,255,159,0.25)" }}>
           [ END_OF_FILE ] — resume-to-portfolio — {new Date().getFullYear()}
         </div>

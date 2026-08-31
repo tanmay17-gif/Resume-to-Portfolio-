@@ -140,75 +140,40 @@ export async function orchestrateExtraction(opts: {
 
   try {
     if (!isPdf) {
-      // DOC/DOCX path — simple text extraction, no vision
+      // DOC/DOCX path — mammoth text → Gemini text extraction, no vision ever
       const text = await extractDocx(fileBuffer);
       if (!text.trim()) {
         return { status: "error", data: {}, confidence: 0, used_vision_fallback: false };
       }
       const data = await extractWithGeminiText(text);
-      return { status: "ok", data, confidence: 0.75, used_vision_fallback: false };
+      return { status: "ok", data, confidence: 0.8, used_vision_fallback: false };
     }
 
-    // PDF path — PyMuPDF + complexity detection
-    let pyResult = await extractViaPython(filePath, 150);
-    let confidence = pyResult.confidence;
-    let isComplex = pyResult.is_complex;
+    // PDF path — PyMuPDF first, then decide text vs vision in one pass
+    const pyResult = await extractViaPython(filePath, 150);
+    const textLen = pyResult.text.trim().length;
     let usedVision = false;
+    let confidence = pyResult.confidence;
     let data: Partial<SchemaData>;
 
-    // If text very short but image exists, force vision
-    const textLen = pyResult.text.trim().length;
+    const shouldUseVision = pyResult.is_complex || pyResult.confidence < 0.5 || textLen < 400;
 
-    if (isComplex || confidence < 0.5 || textLen < 400) {
-      // Try vision fallback
-      if (pyResult.image_base64) {
-        try {
-          data = await extractWithGeminiVision(pyResult.image_base64);
-          usedVision = true;
-          confidence = 0.85; // vision confidence higher
-        } catch (visionErr) {
-          // retry at higher DPI once per spec
-          try {
-            const retry = await extractViaPython(filePath, 200);
-            if (retry.image_base64) {
-              data = await extractWithGeminiVision(retry.image_base64);
-              usedVision = true;
-              confidence = 0.82;
-            } else {
-              throw visionErr;
-            }
-          } catch {
-            // fallback to text extraction via Gemini
-            if (pyResult.text.trim().length > 50) {
-              data = await extractWithGeminiText(pyResult.text);
-              usedVision = false;
-            } else {
-              throw visionErr;
-            }
-          }
+    if (shouldUseVision && pyResult.image_base64) {
+      try {
+        data = await extractWithGeminiVision(pyResult.image_base64);
+        usedVision = true;
+        confidence = 0.85;
+      } catch {
+        // Vision failed — fall back to text
+        if (textLen > 50) {
+          data = await extractWithGeminiText(pyResult.text);
+          confidence = 0.6;
+        } else {
+          return { status: "error", data: {}, confidence: 0, used_vision_fallback: false };
         }
-      } else {
-        // no image, fallback to text
-        data = await extractWithGeminiText(pyResult.text);
       }
     } else {
-      // simple layout — use text directly
       data = await extractWithGeminiText(pyResult.text);
-    }
-
-    // Validate at least name/contact present, otherwise treat as low confidence
-    if (!data.name || !(data.contact as any)?.email) {
-      // try vision retry if not already used
-      if (!usedVision && pyResult.image_base64) {
-        try {
-          const visionData = await extractWithGeminiVision(pyResult.image_base64);
-          if (visionData.name) {
-            data = visionData;
-            usedVision = true;
-            confidence = 0.8;
-          }
-        } catch {}
-      }
     }
 
     return { status: "ok", data, confidence, used_vision_fallback: usedVision };

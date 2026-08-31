@@ -5,13 +5,13 @@ export type CuratedData = SchemaData & {
   _curationMeta?: { truncated: Record<string, number> };
 };
 
-const CURATION_PROMPT = `You are a portfolio content curator. Given structured resume data JSON, rewrite it into concise, compelling portfolio copy.
-
-Tasks:
-1. Rewrite each experience/project bullet into shorter, punchier portfolio language — cut filler words, keep impact, avoid resume-formal phrasing. Each bullet max 16 words.
-2. If summary is missing or generic, generate a 2-3 sentence "about me" narrative from role, focus area, standout skills — should read like a personal website intro, warm and confident, not a resume header.
-3. Keep all facts truthful — do not invent jobs, dates, or tech not in input.
-4. Return ONLY raw JSON matching the same shape as input, with rewritten bullets and improved summary. Omit empty optional keys.
+// Curate only the parts worth rewriting — summary + bullets
+// This keeps the prompt small and fast instead of sending the entire JSON
+const CURATION_PROMPT = `You are a portfolio content curator. Given structured resume data JSON, do two things:
+1. If summary is missing or generic (reads like a resume objective), generate a 2-3 sentence first-person "about me" narrative — warm, confident, personal-website tone. Keep it under 60 words.
+2. Rewrite each experience/project bullet into shorter, punchier portfolio copy — max 15 words each, cut filler, keep impact verbs and numbers.
+3. Keep all facts truthful — do not invent anything.
+4. Return ONLY raw JSON matching the same shape as input. Omit empty optional keys.
 
 Input JSON:
 `;
@@ -28,26 +28,64 @@ function parseJson(text: string): unknown {
   throw new Error("Failed to parse curated JSON: " + text.slice(0, 400));
 }
 
+// Checks whether curation would actually improve anything
+function needsCuration(data: SchemaData): boolean {
+  const hasBullets = data.experience?.some(e => e.bullets?.length > 0) ||
+    data.projects?.some(p => p.description?.length > 0);
+  const hasSummary = !!data.summary;
+  return hasBullets || !hasSummary;
+}
+
+// Build a minimal payload — only fields curation can improve
+function buildCurationPayload(data: SchemaData): Partial<SchemaData> {
+  return {
+    name: data.name,
+    contact: data.contact,
+    ...(data.summary ? { summary: data.summary } : {}),
+    ...(data.experience?.length ? {
+      experience: data.experience.map(e => ({
+        title: e.title, company: e.company, dates: e.dates,
+        bullets: e.bullets.slice(0, 5) // cap bullets to reduce tokens
+      }))
+    } : {}),
+    ...(data.projects?.length ? {
+      projects: data.projects.map(p => ({
+        name: p.name, description: p.description, tech: p.tech, link: p.link
+      }))
+    } : {}),
+  };
+}
+
 export async function curateData(structured: SchemaData): Promise<{ status: "ok" | "error"; curated_data: SchemaData }> {
   try {
-    const prompt = CURATION_PROMPT + JSON.stringify(structured, null, 2);
+    // Skip curation if nothing to improve — saves one full LLM round-trip
+    if (!needsCuration(structured)) {
+      return { status: "ok", curated_data: structured };
+    }
+
+    // Only send curation-relevant fields, not the entire schema
+    const payload = buildCurationPayload(structured);
+    const prompt = CURATION_PROMPT + JSON.stringify(payload, null, 0); // compact JSON
     const { text } = await geminiGenerate({ prompt, model: "gemini-3.6-flash" });
-    const parsed = parseJson(text) as SchemaData;
-    // Ensure required fields remain
-    if (!parsed.name || !parsed.contact?.email) {
+    const parsed = parseJson(text) as Partial<SchemaData>;
+
+    if (!parsed.name) {
       return { status: "error", curated_data: structured };
     }
-    
-    // Merge curated data back with structured to guarantee no data loss of sections
+
+    // Deep merge: curated fields override structured, everything else preserved exactly
     const merged: SchemaData = {
       ...structured,
-      ...parsed,
-      education: parsed.education && parsed.education.length ? parsed.education : structured.education,
-      experience: parsed.experience && parsed.experience.length ? parsed.experience : structured.experience,
-      projects: parsed.projects && parsed.projects.length ? parsed.projects : structured.projects,
-      skills: parsed.skills && parsed.skills.length ? parsed.skills : structured.skills,
-      achievements: parsed.achievements && parsed.achievements.length ? parsed.achievements : structured.achievements,
-      custom_sections: parsed.custom_sections && parsed.custom_sections.length ? parsed.custom_sections : structured.custom_sections,
+      // Only override summary and content that curation touched
+      ...(parsed.summary ? { summary: parsed.summary } : {}),
+      experience: (parsed.experience?.length ? parsed.experience : null)?.map((ce, i) => ({
+        ...(structured.experience?.[i] ?? ce),
+        bullets: ce.bullets?.length ? ce.bullets : structured.experience?.[i]?.bullets ?? [],
+      })) ?? structured.experience,
+      projects: (parsed.projects?.length ? parsed.projects : null)?.map((cp, i) => ({
+        ...(structured.projects?.[i] ?? cp),
+        description: cp.description || structured.projects?.[i]?.description || "",
+      })) ?? structured.projects,
     };
 
     return { status: "ok", curated_data: merged };

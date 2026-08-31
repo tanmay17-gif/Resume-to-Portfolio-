@@ -174,7 +174,8 @@ export function ReviewModal({
                   { id: "experience", label: "Experience" },
                   { id: "education", label: "Education" },
                   { id: "projects", label: "Projects" },
-                  { id: "skills", label: "Skills" }
+                  { id: "skills", label: "Skills" },
+                  { id: "custom", label: "Other" }
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -202,7 +203,8 @@ export function ReviewModal({
                     { id: "experience", label: "Experience", count: data.experience?.length || 0 },
                     { id: "education", label: "Education", count: data.education?.length || 0 },
                     { id: "projects", label: "Projects", count: data.projects?.length || 0 },
-                    { id: "skills", label: "Skills", count: (data.skills?.length || 0) + (data.achievements?.length || 0) }
+                    { id: "skills", label: "Skills", count: (data.skills?.length || 0) + (data.achievements?.length || 0) },
+                    { id: "custom", label: "Other Sections", count: data.custom_sections?.length || 0 }
                   ].map(tab => (
                     <button
                       key={tab.id}
@@ -337,6 +339,42 @@ export function ReviewModal({
                             <input className="ed-input text-xs" value={(proj.tech ?? []).join(", ")} onChange={(e) => { const n=[...(data.projects??[])]; n[i]={...n[i], tech:e.target.value.split(",").map(s=>s.trim()).filter(Boolean)}; setData({...data, projects:n}); }} placeholder="Tech stack (comma separated)" />
                             <input className="ed-input text-xs" value={proj.link ?? ""} onChange={(e) => { const n=[...(data.projects??[])]; n[i]={...n[i], link:e.target.value || null}; setData({...data, projects:n}); }} placeholder="URL Link" />
                           </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Skills */}
+                  <div className={activeTab === "skills" ? "block" : "hidden md:block md:opacity-30 md:hover:opacity-100 transition-opacity mb-12"} onClick={() => setActiveTab("skills")}>
+                    <div className="flex items-center justify-between mb-5 border-b border-[#e0ddd4] pb-2">
+                      <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a9890]">Skills & Achievements</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-label">Skills (comma separated)</label>
+                        <textarea className="ed-input resize-y min-h-[80px]" value={(data.skills ?? []).join(", ")} onChange={(e) => setData({ ...data, skills: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })} placeholder="React, Node.js, TypeScript..." />
+                      </div>
+                      <div>
+                        <label className="text-label">Achievements (one per line)</label>
+                        <textarea className="ed-input resize-y min-h-[80px]" value={(data.achievements ?? []).join("\n")} onChange={(e) => setData({ ...data, achievements: e.target.value.split("\n").map(s => s.trim()).filter(Boolean) })} placeholder="Won hackathon 2023..." />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Custom Sections */}
+                  <div className={activeTab === "custom" ? "block" : "hidden md:block md:opacity-30 md:hover:opacity-100 transition-opacity mb-12"} onClick={() => setActiveTab("custom")}>
+                    <div className="flex items-center justify-between mb-5 border-b border-[#e0ddd4] pb-2">
+                      <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a9890]">Other Sections</h3>
+                      <button className="ed-btn-ghost text-[10px] py-1 px-2 flex items-center gap-1" onClick={() => setData({ ...data, custom_sections: [...(data.custom_sections ?? []), { title: "New Section", items: ["Item 1"] }] })}>
+                        <Plus className="size-3" /> Add Section
+                      </button>
+                    </div>
+                    <div className="space-y-4">
+                      {(data.custom_sections ?? []).map((sec, i) => (
+                        <div key={i} className="group relative bg-[#faf9f6] border border-[#d8d5cc] p-4">
+                          <button className="absolute right-2 top-2 size-6 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-[#faf9f6] text-red-600 border border-red-200 transition-opacity" onClick={() => setData((p) => ({ ...p, custom_sections: p.custom_sections?.filter((_, idx) => idx !== i) }))}><Trash2 className="size-3" /></button>
+                          <input className="w-full bg-transparent border-0 font-bold text-sm outline-none mb-2 focus:bg-white focus:ring-1 ring-[#d8d5cc] px-1 py-1 pr-10" value={sec.title} onChange={(e) => { const n=[...(data.custom_sections??[])]; n[i]={...n[i], title:e.target.value}; setData({...data, custom_sections:n}); }} placeholder="Section Title" />
+                          <textarea className="ed-input text-sm resize-y min-h-[80px]" value={(sec.items ?? []).join("\n")} onChange={(e) => { const n=[...(data.custom_sections??[])]; n[i]={...n[i], items:e.target.value.split("\n").map(s=>s.trim()).filter(Boolean)}; setData({...data, custom_sections:n}); }} placeholder="One item per line..." />
                         </div>
                       ))}
                     </div>

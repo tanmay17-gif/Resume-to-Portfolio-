@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { stylePresets } from "@/lib/stylePresets";
 import type { SchemaData } from "@/lib/schema";
 import { GenerativeProjectVisual } from "@/components/project-visual";
-import { ExperienceEntry, TechPill, SkillsSection, ContactRow } from "@/components/portfolio-primitives";
+import { ExperienceEntry, TechPill, SkillsSection, ContactRow , CustomSections } from "@/components/portfolio-primitives";
 import { GlassHero, GlassProjectVisual, GlassSkillsBg } from "@/components/threeui-adapter";
 import { ExternalLink } from "lucide-react";
 import { useActiveSection } from "@/hooks/use-active-section";
@@ -27,7 +27,8 @@ export function GlassLayout({ data }: { data: SchemaData }) {
     { id: "section-about", label: "About" },
     ...(has(data.projects) ? [{ id: "section-work", label: "Work" }] : []),
     ...(has(data.experience) ? [{ id: "section-experience", label: "Experience" }] : []),
-    ...(has(data.skills) || has(data.education) ? [{ id: "section-capabilities", label: "Capabilities" }] : []),
+    ...(has(data.skills) || has(data.education) || has(data.achievements) ? [{ id: "section-capabilities", label: "Capabilities" }] : []),
+    ...(has(data.custom_sections) ? [{ id: "section-custom", label: "More" }] : []),
   ];
 
   const { activeId, scrollTo } = useActiveSection(navSections);
@@ -236,6 +237,13 @@ export function GlassLayout({ data }: { data: SchemaData }) {
               </div>
             )}
           </div>
+
+          {/* Custom Sections */}
+          {has(data.custom_sections) && (
+            <div id="section-custom" className="mt-6 p-6 rounded-3xl" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(20px)" }}>
+              <CustomSections data={data} presetKey={p} />
+            </div>
+          )}
         </div>
       </div>
     </div>

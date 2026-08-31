@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { stylePresets } from "@/lib/stylePresets";
 import type { SchemaData } from "@/lib/schema";
-import { ExperienceEntry, TechPill, SkillsSection, ContactRow } from "@/components/portfolio-primitives";
+import { ExperienceEntry, TechPill, SkillsSection, ContactRow , CustomSections } from "@/components/portfolio-primitives";
 import { GenerativeProjectVisual } from "@/components/project-visual";
 import { MinimalHero, MinimalProjectVisual } from "@/components/threeui-adapter";
 import { ExternalLink } from "lucide-react";
@@ -27,7 +27,8 @@ export function MinimalLayout({ data }: { data: SchemaData }) {
     { id: "section-about", label: "About" },
     ...(has(data.projects) ? [{ id: "section-work", label: "Work" }] : []),
     ...(has(data.experience) ? [{ id: "section-experience", label: "Exp" }] : []),
-    ...(has(data.skills) ? [{ id: "section-capabilities", label: "Skills" }] : []),
+    ...(has(data.skills) || has(data.education) ? [{ id: "section-capabilities", label: "Skills" }] : []),
+    ...(has(data.custom_sections) ? [{ id: "section-custom", label: "More" }] : []),
   ];
 
   const { activeId, scrollTo } = useActiveSection(navSections);
@@ -178,6 +179,14 @@ export function MinimalLayout({ data }: { data: SchemaData }) {
               </section>
             )}
           </div>
+
+
+          {/* Custom Sections */}
+          {has(data.custom_sections) && (
+            <section id="section-custom" className="mb-16">
+              <CustomSections data={data} presetKey={p} />
+            </section>
+          )}
 
           <div className="text-xs" style={{ color: preset.palette.muted, opacity: 0.35 }}>
             {data.name} — generated via Resume to Portfolio

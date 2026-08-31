@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { stylePresets } from "@/lib/stylePresets";
 import type { SchemaData } from "@/lib/schema";
-import { ExperienceEntry, TechPill, SkillsSection } from "@/components/portfolio-primitives";
+import { ExperienceEntry, TechPill, SkillsSection , CustomSections } from "@/components/portfolio-primitives";
 import { ExternalLink } from "lucide-react";
 import { ClassicHero } from "@/components/threeui-adapter";
 import { useActiveSection } from "@/hooks/use-active-section";
@@ -86,6 +86,10 @@ export function ClassicLayout({ data }: { data: SchemaData }) {
             {data.name}
           </h1>
           {role && <p className="mt-6 text-[10px] sm:text-xs uppercase tracking-[0.3em]" style={{ color: preset.palette.accent }}>{role}</p>}
+          
+          {/* Custom Sections */}
+          <CustomSections data={data} presetKey={p} />
+
           <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs" style={{ color: preset.palette.muted }}>
             <span className="truncate max-w-[200px] sm:max-w-none">{data.contact.email}</span>
             {data.contact.phone && <><span className="opacity-50">·</span><span>{data.contact.phone}</span></>}

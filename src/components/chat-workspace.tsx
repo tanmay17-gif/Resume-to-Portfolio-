@@ -13,6 +13,7 @@ import { AppShell, StyleDropdown } from "@/components/app-shell";
 import { ReviewModal } from "@/components/review-modal";
 import { PortfolioPreviewFrame } from "@/components/portfolio-preview-frame";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 type Message = {
@@ -138,6 +139,43 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newParam]);
+
+  // Load session from Supabase if ?session= URL parameter is present
+  const sessionParam = searchParams.get("session");
+  useEffect(() => {
+    if (sessionParam) {
+      const fetchSession = async () => {
+        setProcessing(true);
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("portfolios")
+          .select("style_preset, portfolio_data_id, portfolio_data(schema_data)")
+          .eq("id", sessionParam)
+          .single();
+        
+        if (data && !error && data.portfolio_data) {
+          // data.portfolio_data can be an array if not a unique foreign key, but it's a 1:1 or 1:N so supabase might return an object
+          const schema = Array.isArray(data.portfolio_data) ? data.portfolio_data[0]?.schema_data : (data.portfolio_data as any).schema_data;
+          if (schema) {
+            setPortfolioDataId(data.portfolio_data_id);
+            setLiveData(schema);
+            setSelectedStyle(data.style_preset as StylePresetKey);
+            
+            setMessages([{ 
+              id: crypto.randomUUID(), 
+              role: "agent", 
+              type: "preview", 
+              stylePreset: data.style_preset as StylePresetKey, 
+              schemaData: schema 
+            }]);
+          }
+        }
+        setProcessing(false);
+      };
+      fetchSession();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionParam]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -371,7 +409,7 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
         aria-label="Upload resume"
       />
 
-      <div className="flex flex-col h-[calc(100vh-48px)] max-w-4xl mx-auto w-full relative">
+      <div className="flex flex-col flex-1 min-h-0 w-full relative">
 
         {/* Chat History */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-8 pb-44 space-y-7 scroll-smooth">
@@ -470,20 +508,8 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
                           className="text-sm text-[#1a1a18] border border-[#d8d5cc] px-4 py-3 inline-block leading-relaxed"
                           style={{ background: "var(--ed-cream, #faf9f6)" }}
                         >
-                          {msg.content}
+                        {msg.content}
                         </div>
-                        {/* Review button on post-extraction message */}
-                        {msg.content?.includes("Your story is ready") && (
-                          <div className="mt-2">
-                            <button
-                              onClick={() => setReviewModalOpen(true)}
-                              className="ed-btn-ghost text-xs py-1.5 px-3 flex items-center gap-1.5"
-                            >
-                              <FileText className="size-3" />
-                              Review & Edit Data
-                            </button>
-                          </div>
-                        )}
                       </div>
                     )}
 

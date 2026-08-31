@@ -625,7 +625,7 @@ export function AppShell({ children, userEmail }: { children: React.ReactNode; u
   );
 
   return (
-    <div className="min-h-screen flex" style={{ background: "var(--ed-ivory, #f7f5f0)" }}>
+    <div className="h-screen flex overflow-hidden" style={{ background: "var(--ed-ivory, #f7f5f0)" }}>
       <aside
         className={`hidden md:flex flex-col shrink-0 border-r border-[#e0ddd4] transition-all duration-200 z-20 ${collapsed ? "w-14" : "w-[228px]"}`}
         style={{ background: "var(--ed-cream, #faf9f6)" }}
@@ -684,7 +684,7 @@ export function AppShell({ children, userEmail }: { children: React.ReactNode; u
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 flex flex-col min-h-0 relative">
           {children}
         </main>
       </div>
