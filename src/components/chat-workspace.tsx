@@ -163,23 +163,34 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
           .eq("id", sessionParam)
           .single();
         
-        if (data && !error && data.portfolio_data) {
+        if (error) {
+          setMessages([{ id: "error", role: "agent", type: "text", content: `Failed to load session: ${error.message}` }]);
+          setProcessing(false);
+          return;
+        }
+
+        if (data && data.portfolio_data) {
           // data.portfolio_data can be an array if not a unique foreign key, but it's a 1:1 or 1:N so supabase might return an object
           const schema = Array.isArray(data.portfolio_data) ? data.portfolio_data[0]?.schema_data : (data.portfolio_data as any).schema_data;
+          
           if (schema) {
             setPortfolioDataId(data.portfolio_data_id);
             setLiveData(schema);
-            setSelectedStyle(data.style_preset as StylePresetKey);
+            setSelectedStyle((data.style_preset as StylePresetKey) || "minimal");
             setViews(data.views || 0);
             
             setMessages([{ 
               id: crypto.randomUUID(), 
               role: "agent", 
               type: "preview", 
-              stylePreset: data.style_preset as StylePresetKey, 
+              stylePreset: (data.style_preset as StylePresetKey) || "minimal", 
               schemaData: schema 
             }]);
+          } else {
+            setMessages([{ id: "error", role: "agent", type: "text", content: `Session found, but portfolio data schema is empty or missing.` }]);
           }
+        } else {
+           setMessages([{ id: "error", role: "agent", type: "text", content: `No data returned from database for this session ID.` }]);
         }
         setProcessing(false);
       };
