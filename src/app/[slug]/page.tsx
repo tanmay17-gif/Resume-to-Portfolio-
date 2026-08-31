@@ -54,6 +54,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  // Increment view count in the background (fire and forget)
+  const supabase = createServiceClient();
+  supabase
+    .from("portfolios")
+    .select("views")
+    .eq("slug", slug)
+    .single()
+    .then(({ data }) => {
+      if (data) {
+        supabase.from("portfolios").update({ views: (data.views || 0) + 1 }).eq("slug", slug).then();
+      }
+    });
+
   const name = portfolio.data.name ?? "Portfolio";
   const role = portfolio.data.experience?.[0]?.title;
   const summary = portfolio.data.summary;

@@ -85,12 +85,9 @@ function PublishedCard({ slug, onCopy, copied }: { slug: string; onCopy: () => v
         </button>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={() => window.open("https://us.posthog.com", "_blank")}
-          className="ed-btn-ghost flex items-center justify-center gap-1.5 text-xs py-2"
-        >
-          <BarChart3 className="size-3.5" /> Insights
-        </button>
+        <div className="ed-btn-ghost flex items-center justify-center gap-1.5 text-xs py-2 pointer-events-none opacity-80">
+          <BarChart3 className="size-3.5" /> {views} Views
+        </div>
         <Link
           href={`/${slug}`}
           target="_blank"
@@ -110,6 +107,7 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
   const [selectedStyle, setSelectedStyle] = useState<StylePresetKey>("minimal");
   const [promptText, setPromptText] = useState("");
   const [copied, setCopied] = useState(false);
+  const [views, setViews] = useState<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // ── WAKE UP RENDER MICROSERVICE ──────────────────────────────────────────
@@ -161,7 +159,7 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("portfolios")
-          .select("style_preset, portfolio_data_id, portfolio_data(schema_data)")
+          .select("style_preset, portfolio_data_id, views, portfolio_data(schema_data)")
           .eq("id", sessionParam)
           .single();
         
@@ -172,6 +170,7 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
             setPortfolioDataId(data.portfolio_data_id);
             setLiveData(schema);
             setSelectedStyle(data.style_preset as StylePresetKey);
+            setViews(data.views || 0);
             
             setMessages([{ 
               id: crypto.randomUUID(), 
