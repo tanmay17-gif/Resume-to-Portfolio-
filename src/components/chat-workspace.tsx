@@ -70,7 +70,7 @@ function ChecklistBlock({ steps, completed, label }: { steps: string[]; complete
 }
 
 // ─── Published Card ──────────────────────────────────────────────────────────
-function PublishedCard({ slug, onCopy, copied }: { slug: string; onCopy: () => void; copied: boolean }) {
+function PublishedCard({ slug, onCopy, copied, views }: { slug: string; onCopy: () => void; copied: boolean; views: number }) {
   const url = `${window.location.origin}/${slug}`;
   return (
     <div className="border border-[#d8d5cc] p-5 w-full max-w-md" style={{ background: "var(--ed-cream, #faf9f6)" }}>
@@ -600,6 +600,7 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
                         slug={msg.publishedSlug}
                         onCopy={() => handleCopyLink(msg.publishedSlug!)}
                         copied={copied}
+                        views={views}
                       />
                     )}
                   </div>
