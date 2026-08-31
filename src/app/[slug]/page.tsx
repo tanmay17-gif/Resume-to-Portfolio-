@@ -54,19 +54,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  // Increment view count in the background (fire and forget)
-  const supabase = createServiceClient();
-  supabase
-    .from("portfolios")
-    .select("views")
-    .eq("slug", slug)
-    .single()
-    .then(({ data }) => {
-      if (data) {
-        supabase.from("portfolios").update({ views: (data.views || 0) + 1 }).eq("slug", slug).then();
-      }
-    });
-
   const name = portfolio.data.name ?? "Portfolio";
   const role = portfolio.data.experience?.[0]?.title;
   const summary = portfolio.data.summary;
@@ -92,6 +79,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function SlugPage({ params }: PageProps) {
   const { slug } = await params;
   const portfolio = await getPortfolio(slug);
@@ -99,6 +89,19 @@ export default async function SlugPage({ params }: PageProps) {
   if (!portfolio) {
     notFound();
   }
+
+  // Increment view count in the background (fire and forget)
+  const supabase = createServiceClient();
+  supabase
+    .from("portfolios")
+    .select("views")
+    .eq("slug", slug)
+    .single()
+    .then(({ data }) => {
+      if (data) {
+        supabase.from("portfolios").update({ views: (data.views || 0) + 1 }).eq("slug", slug).then();
+      }
+    });
 
   return <PortfolioPublicPage data={portfolio.data} presetKey={portfolio.style} slug={slug} />;
 }
