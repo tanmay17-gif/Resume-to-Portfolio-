@@ -89,7 +89,30 @@ export async function extractWithGeminiVision(imageBase64: string): Promise<Part
   return parseJsonFromText(res) as Partial<SchemaData>;
 }
 
-// Run Python PyMuPDF extraction
+// Call the Render microservice (used in production on Vercel)
+export async function extractViaService(fileBuffer: Buffer, filename: string, dpi = 150): Promise<{
+  text: string;
+  confidence: number;
+  is_complex: boolean;
+  image_base64: string | null;
+  pages: number;
+}> {
+  const serviceUrl = process.env.EXTRACT_SERVICE_URL;
+  if (!serviceUrl) throw new Error("EXTRACT_SERVICE_URL not set");
+
+  const form = new FormData();
+  const blob = new Blob([fileBuffer], { type: "application/pdf" });
+  form.append("file", blob, filename);
+  form.append("dpi", String(dpi));
+
+  const res = await fetch(`${serviceUrl}/extract`, { method: "POST", body: form });
+  if (!res.ok) throw new Error(`Extract service error: ${res.status} ${await res.text()}`);
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  return json;
+}
+
+// Run Python PyMuPDF extraction (local dev only)
 export function extractViaPython(filePath: string, dpi = 150): Promise<{
   text: string;
   confidence: number;
@@ -150,7 +173,10 @@ export async function orchestrateExtraction(opts: {
     }
 
     // PDF path — PyMuPDF first, then decide text vs vision in one pass
-    const pyResult = await extractViaPython(filePath, 150);
+    // In production (Vercel), call the Render microservice; locally, spawn Python
+    const pyResult = process.env.EXTRACT_SERVICE_URL
+      ? await extractViaService(fileBuffer, filename, 150)
+      : await extractViaPython(filePath, 150);
     const textLen = pyResult.text.trim().length;
     let usedVision = false;
     let confidence = pyResult.confidence;
