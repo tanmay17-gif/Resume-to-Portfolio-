@@ -27,13 +27,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid portfolio_data_id or style_preset" }, { status: 400 });
   }
 
-  if (!recaptcha_token) {
-    return NextResponse.json({ error: "Missing reCAPTCHA token" }, { status: 400 });
-  }
-
-  // Verify reCAPTCHA token
+  // Verify reCAPTCHA token only if configured
   const secretKey = process.env.RECAPTCHA_SECRET_KEY;
   if (secretKey) {
+    if (!recaptcha_token) {
+      return NextResponse.json({ error: "Missing reCAPTCHA token" }, { status: 400 });
+    }
     const recaptchaRes = await fetch("https://www.google.com/recaptcha/api/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
