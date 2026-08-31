@@ -22,6 +22,7 @@ export async function POST(request: Request) {
   const portfolio_data_id = body.portfolio_data_id as string;
   const style_preset = body.style_preset as StylePresetKey;
   const recaptcha_token = body.recaptcha_token as string;
+  const schema_data = body.schema_data;
 
   if (!portfolio_data_id || !style_preset || !(style_preset in stylePresets)) {
     return NextResponse.json({ error: "Invalid portfolio_data_id or style_preset" }, { status: 400 });
@@ -51,27 +52,53 @@ export async function POST(request: Request) {
   if (pdErr || !pd) return NextResponse.json({ error: "portfolio_data not found" }, { status: 404 });
   if (pd.user_id !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const name = (pd.schema_data as { name?: string })?.name ?? "portfolio";
-  let slug = slugify(name);
-  // ensure uniqueness: retry if conflict
-  for (let i = 0; i < 3; i++) {
-    const { data: existing } = await service.from("portfolios").select("id").eq("slug", slug).maybeSingle();
-    if (!existing) break;
-    slug = slugify(name + "-" + Math.random().toString(36).slice(2, 4));
+  if (schema_data) {
+    await service.from("portfolio_data").update({ schema_data }).eq("id", portfolio_data_id);
+    pd.schema_data = schema_data;
   }
 
-  const { data, error } = await service
-    .from("portfolios")
-    .insert({
-      portfolio_data_id,
-      user_id: user.id,
-      slug,
-      style_preset,
-      published: true,
-      published_at: new Date().toISOString(),
-    })
-    .select("id, slug")
-    .single();
+  const name = (pd.schema_data as { name?: string })?.name ?? "portfolio";
+  
+  const { data: existingPort } = await service.from("portfolios").select("id, slug").eq("portfolio_data_id", portfolio_data_id).maybeSingle();
+  
+  let data, error;
+  if (existingPort) {
+    const res = await service
+      .from("portfolios")
+      .update({
+        style_preset,
+        published: true,
+        published_at: new Date().toISOString(),
+      })
+      .eq("id", existingPort.id)
+      .select("id, slug")
+      .single();
+    data = res.data;
+    error = res.error;
+  } else {
+    let slug = slugify(name);
+    // ensure uniqueness: retry if conflict
+    for (let i = 0; i < 3; i++) {
+      const { data: existing } = await service.from("portfolios").select("id").eq("slug", slug).maybeSingle();
+      if (!existing) break;
+      slug = slugify(name + "-" + Math.random().toString(36).slice(2, 4));
+    }
+
+    const res = await service
+      .from("portfolios")
+      .insert({
+        portfolio_data_id,
+        user_id: user.id,
+        slug,
+        style_preset,
+        published: true,
+        published_at: new Date().toISOString(),
+      })
+      .select("id, slug")
+      .single();
+    data = res.data;
+    error = res.error;
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

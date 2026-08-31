@@ -85,8 +85,21 @@ function PublishedCard({ slug, onCopy, copied, views }: { slug: string; onCopy: 
         </button>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <div className="ed-btn-ghost flex items-center justify-center gap-1.5 text-xs py-2 pointer-events-none opacity-80">
+        <div className="ed-btn-ghost flex items-center justify-center gap-1.5 text-xs py-2 opacity-80">
           <BarChart3 className="size-3.5" /> {views} Views
+          <button 
+            onClick={async () => {
+              try {
+                const supabase = createClient();
+                const { data } = await supabase.from("portfolios").select("views").eq("slug", slug).single();
+                if (data) setViews(data.views || 0);
+              } catch {}
+            }}
+            className="p-1 hover:bg-[#e8e4da] rounded pointer-events-auto transition-colors" 
+            title="Refresh views"
+          >
+            <RotateCw className="size-3" />
+          </button>
         </div>
         <Link
           href={`/${slug}`}
@@ -159,7 +172,7 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("portfolios")
-          .select("style_preset, portfolio_data_id, views, portfolio_data(schema_data)")
+          .select("style_preset, portfolio_data_id, portfolio_data(schema_data)")
           .eq("id", sessionParam)
           .single();
         
@@ -177,7 +190,12 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
             setPortfolioDataId(data.portfolio_data_id);
             setLiveData(schema);
             setSelectedStyle((data.style_preset as StylePresetKey) || "minimal");
-            setViews(data.views || 0);
+            
+            // Try fetching views separately so it doesn't crash the session if the column is missing
+            try {
+              const { data: vData } = await supabase.from("portfolios").select("views").eq("id", sessionParam).single();
+              if (vData) setViews(vData.views || 0);
+            } catch {}
             
             setMessages([{ 
               id: crypto.randomUUID(), 
@@ -236,7 +254,12 @@ export function ChatWorkspace({ userEmail }: { userEmail: string }) {
       const res = await fetch("/api/publish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ portfolio_data_id: portfolioDataId, style_preset: preset, recaptcha_token: recaptchaToken }),
+        body: JSON.stringify({ 
+          portfolio_data_id: portfolioDataId, 
+          style_preset: preset, 
+          recaptcha_token: recaptchaToken,
+          schema_data: liveData
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Publish failed");
